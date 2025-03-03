@@ -33,7 +33,7 @@ df["Review Date"] = pd.to_datetime(df["Review Date"], format="%d-%m-%Y")
 # Extract numerical rating from text
 df["Rating"] = df["Rating"].str.extract(r"(\d)").astype(int)
 
-!pip install tqdm
+pip install tqdm
 # Enable tqdm for Pandas
 tqdm.pandas()
 
