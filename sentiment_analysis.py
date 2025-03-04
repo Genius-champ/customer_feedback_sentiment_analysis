@@ -1,3 +1,4 @@
+!pip install tqdm
 #import models
 import pandas as pd
 import numpy as np
@@ -16,6 +17,8 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from tqdm import tqdm
+# Enable tqdm for Pandas
+tqdm.pandas()
 import streamlit as st
 
 # Download required NLTK resources
@@ -32,10 +35,6 @@ df["Review Date"] = pd.to_datetime(df["Review Date"], format="%d-%m-%Y")
 
 # Extract numerical rating from text
 df["Rating"] = df["Rating"].str.extract(r"(\d)").astype(int)
-
-pip install tqdm
-# Enable tqdm for Pandas
-tqdm.pandas()
 
 # Text Preprocessing
 lemmatizer = nltk.WordNetLemmatizer()
