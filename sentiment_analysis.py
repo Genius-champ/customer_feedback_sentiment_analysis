@@ -45,6 +45,8 @@ def clean_text(text):
     words = word_tokenize(text)
     words = [lemmatizer.lemmatize(word) for word in words if word not in stop_words]
     return " ".join(words)
+    df["Cleaned Review"] = df["Reviewer Comment"].astype(str).apply(clean_text)
+
     df["Cleaned Review"] = df["Reviewer Comment"].astype(str).progress_apply(clean_text)
 
     # Sentiment Analysis using VADER
