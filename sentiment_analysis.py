@@ -88,13 +88,13 @@ print(classification_report(y_test, y_pred_rf))
 st.title("Customer Feedback Sentiment Analysis")
 review_input = st.text_area("Enter a customer review:")
 if st.button("Analyze Sentiment"):
-    cleaned_review = clean_text(review_input)
-    vectorized_review_bow = bow_vectorizer.transform([cleaned_review])
-    vectorized_review_tfidf = tfidf_vectorizer.transform([cleaned_review])
+    Cleaned_Review = clean_text(review_input)
+    vectorized_review_bow = bow_vectorizer.transform([Cleaned_Review])
+    vectorized_review_tfidf = tfidf_vectorizer.transform([Cleaned_Review])
     
     prediction_nb = nb_model.predict(vectorized_review_bow)[0]
     prediction_rf = rf_model.predict(vectorized_review_tfidf)[0]
-    prediction_vader = sia.polarity_scores(cleaned_review)["compound"]
+    prediction_vader = sia.polarity_scores(Cleaned_Review)["compound"]
     vader_sentiment = "positive" if prediction_vader > 0.05 else "negative" if prediction_vader < -0.05 else "neutral"
     
     st.write(f"Naive Bayes (BOW) Prediction: {prediction_nb}")
