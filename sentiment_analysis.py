@@ -17,8 +17,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from tqdm import tqdm
 import streamlit as st
+from textblob import TextBlob
 
-# Download required NLTK resources
 nltk.download("stopwords")
 nltk.download("punkt")
 nltk.download("vader_lexicon")
@@ -39,20 +39,63 @@ tqdm.pandas()
 # Text Preprocessing
 lemmatizer = nltk.WordNetLemmatizer()
 stop_words = set(stopwords.words("english"))
+
 def clean_text(text):
     text = text.lower()
     text = re.sub(r'[^\w\s]', '', text)  # Remove punctuation
     words = word_tokenize(text)
     words = [lemmatizer.lemmatize(word) for word in words if word not in stop_words]
     return " ".join(words)
-    df["Cleaned Review"] = df["Reviewer Comment"].astype(str).apply(clean_text)
 
-    df["Cleaned Review"] = df["Reviewer Comment"].astype(str).progress_apply(clean_text)
+df["Cleaned Review"] = df["Reviewer Comment"].astype(str).progress_apply(clean_text)
 
-    # Sentiment Analysis using VADER
+# Sentiment Analysis using VADER
 sia = SentimentIntensityAnalyzer()
 df["VADER Score"] = df["Cleaned Review"].progress_apply(lambda x: sia.polarity_scores(x)["compound"])
 df["VADER Sentiment"] = df["VADER Score"].apply(lambda x: "positive" if x > 0.05 else "negative" if x < -0.05 else "neutral")
+
+# Distribution of Ratings
+#sns.countplot(data=df, x="Rating", palette="coolwarm")
+#plt.title("Distribution of Ratings")
+#plt.show()
+
+st.write("### Distribution of Ratings")
+sns.countplot(data=df, x="Rating", palette="coolwarm")
+st.pyplot()
+
+# Relationship between Rating and Sentiment
+sns.boxplot(data=df, x="VADER Sentiment", y="Rating", palette="viridis")
+plt.title("Rating vs Sentiment")
+plt.show()
+
+# Word Clouds for Positive and Negative Reviews
+# positive_reviews = df[df["VADER Sentiment"] == "positive"]["Cleaned Review"]
+# negative_reviews = df[df["VADER Sentiment"] == "negative"]["Cleaned Review"]
+
+# positive_wordcloud = WordCloud(width=800, height=400, background_color="white").generate(" ".join(positive_reviews))
+# negative_wordcloud = WordCloud(width=800, height=400, background_color="white").generate(" ".join(negative_reviews))
+
+# plt.figure(figsize=(10,5))
+# plt.imshow(positive_wordcloud, interpolation="bilinear")
+# plt.axis("off")
+# plt.title("Positive Reviews WordCloud")
+# plt.show()
+
+# plt.figure(figsize=(10,5))
+# plt.imshow(negative_wordcloud, interpolation="bilinear")
+# plt.axis("off")
+# plt.title("Negative Reviews WordCloud")
+# plt.show()
+
+st.write("### Word Clouds")
+positive_reviews = df[df["VADER Sentiment"] == "positive"]["Cleaned Review"]
+negative_reviews = df[df["VADER Sentiment"] == "negative"]["Cleaned Review"]
+positive_wordcloud = WordCloud(width=800, height=400, background_color="white").generate(" ".join(positive_reviews))
+negative_wordcloud = WordCloud(width=800, height=400, background_color="white").generate(" ".join(negative_reviews))
+
+st.image(positive_wordcloud.to_array(), caption="Positive Reviews WordCloud")
+st.image(negative_wordcloud.to_array(), caption="Negative Reviews WordCloud")
+
 
 # Bag of Words and TF-IDF Vectorization
 bow_vectorizer = CountVectorizer()
@@ -86,35 +129,3 @@ print("Classification Report (Random Forest - TF-IDF):")
 print(classification_report(y_test, y_pred_rf))
 print("Classification Report (VADER Accuracy):")
 print(classification_report(y_test, y_pred_rf))
-
-# Streamlit App
-st.title("Customer Feedback Sentiment Analysis")
-review_input = st.text_area("Enter a customer review:")
-if st.button("Analyze Sentiment"):
-    cleaned_review = clean_text(review_input)
-    vectorized_review_bow = bow_vectorizer.transform([cleaned_review])
-    vectorized_review_tfidf = tfidf_vectorizer.transform([cleaned_review])
-    
-    prediction_nb = nb_model.predict(vectorized_review_bow)[0]
-    prediction_rf = rf_model.predict(vectorized_review_tfidf)[0]
-    prediction_vader = sia.polarity_scores(Cleaned_Review)["compound"]
-    vader_sentiment = "positive" if prediction_vader > 0.05 else "negative" if prediction_vader < -0.05 else "neutral"
-    
-    st.write(f"Naive Bayes (BOW) Prediction: {prediction_nb}")
-    st.write(f"Random Forest (TF-IDF) Prediction: {prediction_rf}")
-    st.write(f"VADER Prediction: {vader_sentiment}")
-
-st.write("## Sentiment Distribution")
-sns.countplot(data=df, x="VADER Sentiment", palette="coolwarm")
-st.pyplot()
-
-st.write("## Word Clouds")
-positive_reviews = df[df["VADER Sentiment"] == "positive"]["Cleaned Review"]
-negative_reviews = df[df["VADER Sentiment"] == "negative"]["Cleaned Review"]
-positive_wordcloud = WordCloud(width=800, height=400, background_color="white").generate(" ".join(positive_reviews))
-negative_wordcloud = WordCloud(width=800, height=400, background_color="white").generate(" ".join(negative_reviews))
-
-st.image(positive_wordcloud.to_array(), caption="Positive Reviews WordCloud")
-st.image(negative_wordcloud.to_array(), caption="Negative Reviews WordCloud")
-
-print("Analysis Complete. Streamlit app running.")
