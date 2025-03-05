@@ -1,4 +1,4 @@
-venv\Scripts\activate   # On Windows
+
 pip install -r requirements.txt # Streamlit App
 
 st.title("Customer Feedback Sentiment Analysis")
