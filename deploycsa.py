@@ -1,6 +1,3 @@
-
-pip install -r requirements.txt # Streamlit App
-
 st.title("Customer Feedback Sentiment Analysis")
 review_input = st.text_area("Enter a customer review:")
 if st.button("Analyze Sentiment"):
