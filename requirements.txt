@@ -6,3 +6,5 @@ wordcloud
 nltk
 scikit-learn
 tqdm
+TextBlob
+WordCloud
